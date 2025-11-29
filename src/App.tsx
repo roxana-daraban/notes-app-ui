@@ -70,8 +70,48 @@ const App: React.FC = () => {
   setContent("");
   };
 
+  const handleUpdateNote = (event: React.FormEvent) => {
+    event.preventDefault();
+    if(!selectedNote) return;
 
+    const updatedNote: Note = {
+      id: selectedNote.id,
+      title: title,
+      content: content,
+    };
 
+    const updatedNotesList = notes.map((note) => 
+      note.id === selectedNote.id
+        ? updatedNote
+        : note
+    );
+
+    setNotes(updatedNotesList)
+    setTitle("");
+    setContent("");
+    setSelectedNote(null);
+  };
+
+  const handleCancel=()=>{
+    setTitle("");
+    setContent("");
+    setSelectedNote(null);
+  }
+
+  const deleteNote=(
+    event:React.MouseEvent,
+    noteId:number
+  )=>{
+    event.stopPropagation(); // Previne propagarea evenimentului de clic la elementele părinte
+
+     const updateNotes=notes.filter(
+    (note)=>note.id!==noteId
+     );
+     
+     setNotes(updateNotes);
+  };
+  
+ 
   return (
     // Container principal pentru aranjamentul Flexbox (formular + grilă)
     <div className="notes-app-container"> 
@@ -79,7 +119,10 @@ const App: React.FC = () => {
       {/* 1. Formularul de adăugare notiță (stânga) */}
       <div className="sidebar-form-container">
         <form className="note-form"
-        onSubmit={(event)=>handleAddNote(event)}
+        onSubmit={(event)=>
+          selectedNote
+          ? handleUpdateNote(event)
+          : handleAddNote(event)}
         >
           <input 
             value={title}
@@ -100,10 +143,18 @@ const App: React.FC = () => {
             required
             className="form-content-textarea"
           ></textarea>
-          
+
+          {selectedNote ? (
+            <div className="edit-buttons">
+              <button type="submit">Save</button>
+              <button onClick={handleCancel}>Cancel</button>
+
+            </div>
+          ):(
           <button type="submit" className="add-note-button">
             Add Note
           </button>
+          )}
         </form>
       </div>
 
@@ -115,7 +166,10 @@ const App: React.FC = () => {
             
             {/* Header cu butonul de ștergere 'X' */}
             <div className="note-item-header">
-              <button className="delete-note-button">X</button>
+              <button className="delete-note-button"
+              onClick={(event)=>
+                deleteNote(event, note.id)
+              }>X</button>
             </div>
             
             <h2 className="note-title">{note.title}</h2>
